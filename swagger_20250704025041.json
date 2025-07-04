@@ -1,0 +1,667 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "نظام إدارة العملاء والأقساط API",
+        "description": "توثيق API احترافي لنقاط الاتصال الخاصة بنظام إدارة العملاء والأقساط، حيث يتيح إضافة العملاء، تسجيل الدفعات، رفع المستندات، توليد التقارير PDF، وتسجيل الدخول.\n",
+        "version": "1.0.0",
+        "contact": {
+            "name": "دعم النظام",
+            "email": "support@example.com",
+            "url": "https://example.com/support"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:80/api",
+            "description": "خادم التطوير المحلي"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Clients",
+            "description": "العمليات المتعلقة بإدارة بيانات العملاء"
+        },
+        {
+            "name": "Payments",
+            "description": "العمليات المتعلقة بتسجيل الدفعات المالية"
+        },
+        {
+            "name": "Documents",
+            "description": "العمليات المتعلقة برفع وإدارة المستندات"
+        },
+        {
+            "name": "Reports",
+            "description": "العمليات المتعلقة بتوليد التقارير"
+        },
+        {
+            "name": "Auth",
+            "description": "عمليات تسجيل الدخول والتوثيق"
+        }
+    ],
+    "paths": {
+        "/clients": {
+            "post": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "إضافة عميل جديد",
+                "description": "إنشاء سجل عميل جديد في النظام.",
+                "operationId": "createClient",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "description": "بيانات العميل المطلوب إنشاؤها",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClientCreate"
+                            },
+                            "examples": {
+                                "example-1": {
+                                    "summary": "مثال على طلب إنشاء عميل",
+                                    "value": {
+                                        "name": "أحمد القحطاني",
+                                        "phone": "777123456",
+                                        "id_number": "123456789",
+                                        "status": "نشط",
+                                        "address": "صنعاء - شارع الزبيري",
+                                        "notes": "عميل منتظم",
+                                        "total_amount": 10000,
+                                        "paid": 4000
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "تم حفظ العميل بنجاح",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientResponse"
+                                },
+                                "examples": {
+                                    "example-1": {
+                                        "value": {
+                                            "success": true,
+                                            "client_id": "clt_001",
+                                            "message": "تم حفظ العميل بنجاح"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/payments": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "تسجيل دفعة مالية",
+                "description": "تسجيل دفعة مرتبطة بعميل في النظام.",
+                "operationId": "createPayment",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "description": "بيانات الدفعة المالية",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PaymentCreate"
+                            },
+                            "examples": {
+                                "example-1": {
+                                    "summary": "مثال على طلب تسجيل دفعة",
+                                    "value": {
+                                        "client_id": "clt_001",
+                                        "amount": 2000,
+                                        "date": "2025-07-04",
+                                        "note": "دفعة شهر يوليو",
+                                        "receipt": "base64-encoded-file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "تم تسجيل الدفعة",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentResponse"
+                                },
+                                "examples": {
+                                    "example-1": {
+                                        "value": {
+                                            "success": true,
+                                            "payment_id": "pay_001",
+                                            "message": "تم تسجيل الدفعة"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/documents": {
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "رفع مستند",
+                "description": "رفع مستند (PDF) مرتبط بعميل في النظام.",
+                "operationId": "uploadDocument",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "description": "بيانات المستند المطلوب رفعه",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DocumentCreate"
+                            },
+                            "examples": {
+                                "example-1": {
+                                    "summary": "مثال على رفع مستند",
+                                    "value": {
+                                        "client_id": "clt_001",
+                                        "file_name": "بطاقة_هوية.pdf",
+                                        "file_type": "pdf",
+                                        "file_data": "base64-encoded-file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "تم رفع المستند بنجاح",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResponse"
+                                },
+                                "examples": {
+                                    "example-1": {
+                                        "value": {
+                                            "success": true,
+                                            "document_id": "doc_001",
+                                            "message": "تم رفع المستند"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/reports": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "توليد تقرير PDF",
+                "description": "توليد تقرير PDF بناءً على الفلاتر المحددة مثل نوع التقرير والفترة الزمنية.",
+                "operationId": "generateReport",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "نوع التقرير (مثلاً payments)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "تاريخ البداية للتقرير (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "تاريخ النهاية للتقرير (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "تم توليد التقرير بنجاح",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportResponse"
+                                },
+                                "examples": {
+                                    "example-1": {
+                                        "value": {
+                                            "success": true,
+                                            "report_url": "https://yourapp.local/reports/report_001.pdf"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "تسجيل الدخول",
+                "description": "التحقق من رمز الدخول وإصدار رمز توثيق للمستخدم.",
+                "operationId": "login",
+                "requestBody": {
+                    "description": "بيانات تسجيل الدخول",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            },
+                            "examples": {
+                                "example-1": {
+                                    "summary": "مثال على تسجيل الدخول",
+                                    "value": {
+                                        "pin": "1234"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "تم تسجيل الدخول بنجاح",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                },
+                                "examples": {
+                                    "example-1": {
+                                        "value": {
+                                            "success": true,
+                                            "token": "abc123xyz",
+                                            "message": "تم تسجيل الدخول"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ClientCreate": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "أحمد القحطاني"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "777123456"
+                    },
+                    "id_number": {
+                        "type": "string",
+                        "example": "123456789"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "نشط"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "صنعاء - شارع الزبيري"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "عميل منتظم"
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "example": 10000
+                    },
+                    "paid": {
+                        "type": "number",
+                        "example": 4000
+                    }
+                },
+                "required": [
+                    "name",
+                    "phone",
+                    "id_number",
+                    "status",
+                    "total_amount",
+                    "paid"
+                ]
+            },
+            "ClientResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "client_id": {
+                        "type": "string",
+                        "example": "clt_001"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "تم حفظ العميل بنجاح"
+                    }
+                },
+                "required": [
+                    "success",
+                    "client_id",
+                    "message"
+                ]
+            },
+            "PaymentCreate": {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "example": "clt_001"
+                    },
+                    "amount": {
+                        "type": "number",
+                        "example": 2000
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-07-04"
+                    },
+                    "note": {
+                        "type": "string",
+                        "example": "دفعة شهر يوليو"
+                    },
+                    "receipt": {
+                        "type": "string",
+                        "description": "ملف مشفر بصيغة base64",
+                        "example": "base64-encoded-file"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "amount",
+                    "date"
+                ]
+            },
+            "PaymentResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "payment_id": {
+                        "type": "string",
+                        "example": "pay_001"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "تم تسجيل الدفعة"
+                    }
+                },
+                "required": [
+                    "success",
+                    "payment_id",
+                    "message"
+                ]
+            },
+            "DocumentCreate": {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "example": "clt_001"
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "example": "بطاقة_هوية.pdf"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "example": "pdf"
+                    },
+                    "file_data": {
+                        "type": "string",
+                        "description": "ملف مشفر بصيغة base64",
+                        "example": "base64-encoded-file"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "file_name",
+                    "file_type",
+                    "file_data"
+                ]
+            },
+            "DocumentResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "document_id": {
+                        "type": "string",
+                        "example": "doc_001"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "تم رفع المستند"
+                    }
+                },
+                "required": [
+                    "success",
+                    "document_id",
+                    "message"
+                ]
+            },
+            "ReportResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "report_url": {
+                        "type": "string",
+                        "example": "https://yourapp.local/reports/report_001.pdf"
+                    }
+                },
+                "required": [
+                    "success",
+                    "report_url"
+                ]
+            },
+            "LoginRequest": {
+                "type": "object",
+                "properties": {
+                    "pin": {
+                        "type": "string",
+                        "example": "1234"
+                    }
+                },
+                "required": [
+                    "pin"
+                ]
+            },
+            "LoginResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "token": {
+                        "type": "string",
+                        "example": "abc123xyz"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "تم تسجيل الدخول"
+                    }
+                },
+                "required": [
+                    "success",
+                    "token",
+                    "message"
+                ]
+            }
+        },
+        "responses": {
+            "BadRequest": {
+                "description": "بيانات الطلب غير صالحة.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "example": "بيانات الطلب غير صالحة"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "غير مصرح بالولوج أو انتهاء صلاحية التوثيق.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "example": "طلب غير مصرح به"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "InternalServerError": {
+                "description": "خطأ داخلي في الخادم.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "example": "خطأ داخلي في الخادم"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "يتم ارسال رمز التوثيق في هيدر الطلب على شكل Bearer Token."
+            }
+        }
+    }
+}
